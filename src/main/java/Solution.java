@@ -1,49 +1,50 @@
-import java.util.*;
+import java.util.Arrays;
 
 class Solution {
     public int countPalindromicSubsequence(String s) {
         int n = s.length();
-        int[][] firstLastIndexes = new int[26][2];
-        for(int i = 0; i < 26; i++)
-            Arrays.fill(firstLastIndexes[i], -1);
-
-        firstLastIndexes[s.charAt(0) - 'a'][0] = 0;
         int[][] ps = new int[n][26];
-        int[] ps0 = new int[26];
-        ps0[s.charAt(0) - 'a']++;
-        ps[0] = ps0;
-        for(int i = 1; i < n; i++) {
-            if(firstLastIndexes[s.charAt(i) - 'a'][0] == -1) {
-                firstLastIndexes[s.charAt(i) - 'a'][0] = i;
-            }else {
-                firstLastIndexes[s.charAt(i) - 'a'][1] = i;
-            }
-            ps[i] = Arrays.copyOf(ps[i - 1], 26);
-            ps[i][s.charAt(i) - 'a']++;
+        int[][] firstLast = new int[26][2];
+        for(int i = 0; i < 26; i++){
+            Arrays.fill(firstLast[i], -1);
         }
+        firstLast[s.charAt(0) - 'a'][0] = 0;
+        ps[0][s.charAt(0) - 'a']++;
+        for(int i = 1; i < n; i++) {
+            int ch = s.charAt(i) -'a';
+            int[] cur = Arrays.copyOf(ps[i - 1], 26);
+            cur[ch]++;
+            ps[i] = cur;
+            if(firstLast[ch][0] == -1) {
+                firstLast[ch][0] = i;
+            }else {
+                firstLast[ch][1] = i;
+            }
+        }
+        
         int res = 0;
-
         for(int i = 0; i < 26; i++) {
-            if(firstLastIndexes[i][1] == -1 || firstLastIndexes[i][0] == -1){
+            int start = firstLast[i][0];
+            int end = firstLast[i][1];
+            if(start == -1 || end == -1 || end - start == 1){
                 continue;
             }
-
-            int start  = firstLastIndexes[i][0];
-            int end = firstLastIndexes[i][1];
-            if(end - start == 1){
-                continue;
-            }
-
-            for(int j = 0; j < 26; j++) {
-                if(ps[end - 1][j] - ps[start][j] > 0) {
-                    res++;
+            int[] cur = Arrays.copyOf(ps[end], 26);
+            if(start != 0) {
+                for(int j = 0; j < 26; j++) {
+                    cur[j] -= ps[start - 1][j];
                 }
             }
-
-
+            for(int j = 0; j < 26; j++){
+                if(j == i){
+                    res += cur[j] > 2 ? 1 : 0;
+                }
+                else {
+                    res += cur[j] > 0 ? 1 : 0;
+                }
+                
+            }
         }
-
-
         return res;
     }
 }
